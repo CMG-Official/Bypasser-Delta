@@ -1,79 +1,162 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Link Bypasser</title>
-    <!-- Tailwind CSS for styling -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- MDUI for components -->
-    <link rel="stylesheet" href="https://unpkg.com/mdui@2/mdui.css">
-    <script src="https://unpkg.com/mdui@2/mdui.global.js"></script>
-    <!-- hCaptcha script -->
-    <script src="https://hcaptcha.com/1/api.js" async defer></script>
-    
+    <title>Kraak Temperory</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
     <style>
         body {
-            background-color: #121212;
-            color: #ffffff;
-            font-family: system-ui, -apple-system, sans-serif;
+            font-family: monospace;
+            background: #0f0f0f;
+            color: white;
+            padding: 20px;
         }
+
         .hidden {
-            display: none !important;
+            display: none;
         }
-        .show {
-            opacity: 1;
-            transition: opacity 0.3s ease-in;
-        }
+
         #result {
-            opacity: 0;
-            transition: opacity 0.3s ease-out;
+            margin-top: 20px;
+            background: #111;
+            padding: 15px;
+            border: 1px solid #333;
+        }
+
+        pre {
+            color: lime;
+            white-space: pre-wrap;
+        }
+
+        #progress-bar {
+            height: 5px;
+            background: lime;
+            width: 100%;
+            animation: loading 1s infinite linear;
+        }
+
+        @keyframes loading {
+            0% {
+                transform: scaleX(0);
+            }
+
+            50% {
+                transform: scaleX(1);
+            }
+
+            100% {
+                transform: scaleX(0);
+            }
+        }
+
+        /* Supported Sites Styles */
+        .supported-sites {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #333;
+        }
+
+        .sites-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .site-card {
+            background: #111;
+            padding: 12px 15px;
+            border: 1px solid #333;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            color: #ddd;
+        }
+
+        .site-card .material-icons {
+            color: lime;
+            font-size: 20px;
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center p-4">
 
-    <!-- Nav element required by the script -->
-    <nav class="w-full fixed top-0 p-4 transition-all duration-300 z-50">
-        <h1 class="text-xl font-bold text-center">Link Bypasser</h1>
-    </nav>
+<body>
 
-    <div class="w-full max-w-md bg-gray-800 p-8 rounded-2xl shadow-xl mt-16 border border-gray-700">
-        
-        <form id="bypass-form" class="space-y-4">
-            <div>
-                <label for="bypass-url" class="block text-sm font-medium text-gray-300 mb-1">Enter URL to Bypass</label>
-                <input type="url" id="bypass-url" required placeholder="https://example.com/link" 
-                       class="w-full px-4 py-3 bg-gray-900 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-gray-500">
-            </div>
+    <h2>KraakSploit's Bypasser</h2>
 
-            <!-- hCaptcha Container -->
-            <div id="hcaptcha-container" class="flex justify-center my-4"></div>
+    <form id="bypass-form">
+        <input id="bypass-url" placeholder="Enter URL" style="width:300px;" />
+        <button type="submit">Submit</button>
+    </form>
 
-            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200">
-                Bypass Link
-            </button>
-        </form>
+    <div id="progress-bar" class="hidden"></div>
 
-        <!-- Progress Bar -->
-        <div id="progress-bar" class="hidden mt-6">
-            <div class="flex justify-center items-center space-x-2">
-                <mdui-circular-progress></mdui-circular-progress>
-                <span class="text-gray-300 text-sm">Processing...</span>
-            </div>
-        </div>
+    <div id="hcaptcha-container"></div>
 
-        <!-- Error Container -->
-        <div id="errorContainer"></div>
-
-        <!-- Result Container -->
-        <div id="result" class="hidden mt-6 border-t border-gray-700 pt-6">
-            <div id="result-content" class="w-full"></div>
-        </div>
-
+    <div id="result" class="hidden">
+        <h3>Result</h3>
+        <div id="result-content"></div>
     </div>
 
-    <!-- The unobfuscated JS script -->
-    <script src="unobfuscated_dois.js"></script>
+    <div class="supported-sites">
+        <h2>Supported Websites</h2>
+        <div class="sites-grid">
+            <div class="site-card"><span class="material-icons">rocket_launch</span> Platoboost</div>
+            <div class="site-card"><span class="material-icons">developer_board</span> Pandadevelopment</div>
+            <div class="site-card"><span class="material-icons">link</span> Violated</div>
+            <div class="site-card"><span class="material-icons">link</span> Hydrogen</div>
+            <div class="site-card"><span class="material-icons">link</span> Linkvertise</div>
+            <div class="site-card"><span class="material-icons">ads_click</span> Admaven</div>
+            <div class="site-card"><span class="material-icons">diamond</span> Lootlabs</div>
+            <div class="site-card"><span class="material-icons">link</span> Workink</div>
+            <div class="site-card"><span class="material-icons">link</span> Fly.inc</div>
+            <div class="site-card"><span class="material-icons">code</span> Codex</div>
+            <div class="site-card"><span class="material-icons">link</span> Shrtfly</div>
+            <div class="site-card"><span class="material-icons">link</span> Lockrso</div>
+            <div class="site-card"><span class="material-icons">lock_open</span> Linkunlocker</div>
+            <div class="site-card"><span class="material-icons">lock_open</span> Link-unlock</div>
+            <div class="site-card"><span class="material-icons">link</span> Arolinks</div>
+            <div class="site-card"><span class="material-icons">link</span> Tpi.li</div>
+            <div class="site-card"><span class="material-icons">groups</span> Socialwolvez</div>
+            <div class="site-card"><span class="material-icons">link</span> Linkify</div>
+            <div class="site-card"><span class="material-icons">trending_up</span> Mboost</div>
+            <div class="site-card"><span class="material-icons">link</span> Social-unlock</div>
+            <div class="site-card"><span class="material-icons">public</span> Rekonise</div>
+            <div class="site-card"><span class="material-icons">subscriptions</span> Sub2Unlock</div>
+            <div class="site-card"><span class="material-icons">subscriptions</span> Sub4Unlock</div>
+            <div class="site-card"><span class="material-icons">link</span> Bstshrt</div>
+            <div class="site-card"><span class="material-icons">link</span> Sfl.gl</div>
+            <div class="site-card"><span class="material-icons">link</span> Yorurl</div>
+            <div class="site-card"><span class="material-icons">link</span> Loanbuzz</div>
+            <div class="site-card"><span class="material-icons">link</span> Linkzy</div>
+            <div class="site-card"><span class="material-icons">link</span> Ez4Short</div>
+            <div class="site-card"><span class="material-icons">speed</span> Overdrivehub</div>
+            <div class="site-card"><span class="material-icons">content_cut</span> Cuty.io</div>
+            <div class="site-card"><span class="material-icons">link</span> Adfoc.us</div>
+            <div class="site-card"><span class="material-icons">link</span> UnlockNow</div>
+            <div class="site-card"><span class="material-icons">link</span> Rentry</div>
+            <div class="site-card"><span class="material-icons">link</span> Bitly</div>
+            <div class="site-card"><span class="material-icons">link</span> Rb.gy</div>
+            <div class="site-card"><span class="material-icons">link</span> Is.gd</div>
+            <div class="site-card"><span class="material-icons">link</span> Rebrand.ly</div>
+            <div class="site-card"><span class="material-icons">link</span> 6x.work</div>
+            <div class="site-card"><span class="material-icons">link</span> Boost.ink</div>
+            <div class="site-card"><span class="material-icons">link</span> Booo.st</div>
+            <div class="site-card"><span class="material-icons">link</span> Bst.gg</div>
+            <div class="site-card"><span class="material-icons">link</span> Bst.wtf</div>
+            <div class="site-card"><span class="material-icons">link</span> Unlk.link</div>
+            <div class="site-card"><span class="material-icons">link</span> Up-to-down.net</div>
+            <div class="site-card"><span class="material-icons">link</span> scwz.me</div>
+        </div>
+    </div>
+
+    <script src="output.js" defer></script>
+    <script src="https://js.hcaptcha.com/1/api.js?onload=initHcaptcha&render=explicit" async defer></script>
+
 </body>
+
 </html>
