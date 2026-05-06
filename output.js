@@ -3,11 +3,15 @@ let captchaReady = false;
 
 // Initialize hCaptcha
 window.initHcaptcha = function () {
+
     if (typeof hcaptcha === "undefined") return;
 
     try {
+
         widgetId = hcaptcha.render("hcaptcha-container", {
+
             sitekey: "6b22d8d6-8eca-4dbe-9f40-c8ae55c62330",
+
             theme: "dark",
 
             callback: () => {
@@ -21,27 +25,45 @@ window.initHcaptcha = function () {
             "error-callback": () => {
                 captchaReady = false;
             }
+
         });
 
     } catch (err) {
+
         console.error(err);
+
     }
+
 };
 
+// Elements
 const form = document.getElementById("bypass-form");
-const input = document.getElementById("bypass-url");
-const result = document.getElementById("result");
-const resultContent = document.getElementById("result-content");
-const progressBar = document.getElementById("progress-bar");
 
-// URL validation
+const input = document.getElementById("bypass-url");
+
+const result = document.getElementById("result");
+
+const resultContent =
+    document.getElementById("result-content");
+
+const loadingBox =
+    document.getElementById("loading-box");
+
+// Validate URL
 function isValidUrl(url) {
+
     try {
+
         new URL(url);
+
         return true;
+
     } catch {
+
         return false;
+
     }
+
 }
 
 // Main bypass function
@@ -49,28 +71,49 @@ async function performBypass(url) {
 
     try {
 
-        progressBar.classList.remove("hidden");
+        // Show loading
+        loadingBox.classList.remove("hidden");
 
+        // Hide old result
+        result.classList.add("hidden");
+
+        // Check captcha
         if (!captchaReady) {
-            throw new Error("Solve hCaptcha first");
+
+            throw new Error(
+                "Solve hCaptcha first"
+            );
+
         }
 
-        const token = hcaptcha.getResponse(widgetId);
+        // Get captcha token
+        const token =
+            hcaptcha.getResponse(widgetId);
 
         if (!token) {
-            throw new Error("Missing captcha token");
+
+            throw new Error(
+                "Missing captcha token"
+            );
+
         }
 
-        // YOUR CUSTOM API
-        const api =
+        // A
+        const apiUrl =
             `https://delta.atlantislabs.top/api/bypass?url=${encodeURIComponent(url)}&token=${token}`;
 
-        const response = await fetch(api);
+        // Request
+        const response =
+            await fetch(apiUrl);
 
-        const data = await response.json();
+        // JSON
+        const data =
+            await response.json();
 
+        // Show result
         result.classList.remove("hidden");
 
+        // Values
         const bypassedKey =
             data?.data?.result ||
             data?.result ||
@@ -81,44 +124,50 @@ async function performBypass(url) {
             data?.time ||
             "Unknown";
 
+        // Render result
         resultContent.innerHTML = `
+
             <div style="
                 padding:15px;
-                background:#1a1a1a;
+                background:#111;
+                border:1px solid #222;
                 border-radius:8px;
-                border:1px solid #333;
                 margin-bottom:15px;
                 position:relative;
             ">
 
                 <h4 style="
-                    margin:0 0 10px 0;
+                    margin-bottom:10px;
                     color:#aaa;
                 ">
-                    Bypassed Key:
+                    Bypassed Key
                 </h4>
 
                 <div style="
-                    font-size:1.2em;
                     color:lime;
+                    font-size:1.1rem;
                     word-break:break-all;
-                    padding-right:60px;
+                    padding-right:70px;
                 ">
                     ${bypassedKey}
                 </div>
 
-                <button id="copy-key-btn" style="
-                    position:absolute;
-                    right:15px;
-                    top:50%;
-                    transform:translateY(-50%);
-                    padding:6px 12px;
-                    background:#333;
-                    color:white;
-                    border:1px solid #555;
-                    border-radius:4px;
-                    cursor:pointer;
-                ">
+                <button
+                    id="copy-key-btn"
+                    style="
+                        position:absolute;
+                        right:15px;
+                        top:50%;
+                        transform:translateY(-50%);
+                        background:lime;
+                        color:black;
+                        border:none;
+                        padding:8px 12px;
+                        border-radius:6px;
+                        cursor:pointer;
+                        font-weight:bold;
+                    "
+                >
                     Copy
                 </button>
 
@@ -126,96 +175,144 @@ async function performBypass(url) {
 
             <div style="
                 padding:15px;
-                background:#1a1a1a;
+                background:#111;
+                border:1px solid #222;
                 border-radius:8px;
-                border:1px solid #333;
             ">
+
                 <h4 style="
-                    margin:0 0 10px 0;
+                    margin-bottom:10px;
                     color:#aaa;
                 ">
-                    Time Taken:
+                    Time Taken
                 </h4>
 
                 <div style="
-                    font-size:1.1em;
-                    color:#0cf;
+                    color:#00cfff;
                 ">
                     ${timeTaken} seconds
                 </div>
+
             </div>
+
         `;
 
         // Copy button
-        const copyBtn = document.getElementById("copy-key-btn");
+        const copyBtn =
+            document.getElementById(
+                "copy-key-btn"
+            );
 
         if (copyBtn) {
 
-            copyBtn.addEventListener("click", () => {
+            copyBtn.addEventListener(
+                "click",
+                () => {
 
-                navigator.clipboard.writeText(bypassedKey)
-                    .then(() => {
+                    navigator.clipboard
+                        .writeText(bypassedKey)
+                        .then(() => {
 
-                        copyBtn.innerText = "Copied!";
-                        copyBtn.style.background = "lime";
-                        copyBtn.style.color = "black";
+                            copyBtn.innerText =
+                                "Copied!";
 
-                        setTimeout(() => {
-                            copyBtn.innerText = "Copy";
-                            copyBtn.style.background = "#333";
-                            copyBtn.style.color = "white";
-                        }, 2000);
+                            setTimeout(() => {
 
-                    });
+                                copyBtn.innerText =
+                                    "Copy";
 
-            });
+                            }, 2000);
+
+                        });
+
+                }
+            );
 
         }
 
     } catch (err) {
 
+        // Show error
         result.classList.remove("hidden");
 
         resultContent.innerHTML = `
-            <div style="color:red;">
+
+            <div style="
+                color:red;
+                background:#111;
+                border:1px solid #300;
+                padding:15px;
+                border-radius:8px;
+            ">
+
                 ERROR: ${err.message}
+
             </div>
+
         `;
 
     } finally {
 
-        progressBar.classList.add("hidden");
+        // Hide loader
+        loadingBox.classList.add("hidden");
 
-        if (widgetId && typeof hcaptcha !== "undefined") {
+        // Reset captcha
+        if (
+            widgetId &&
+            typeof hcaptcha !== "undefined"
+        ) {
+
             hcaptcha.reset(widgetId);
+
             captchaReady = false;
+
         }
 
     }
+
 }
 
 // Form submit
-form.addEventListener("submit", async (e) => {
+form.addEventListener(
+    "submit",
+    async (e) => {
 
-    e.preventDefault();
+        e.preventDefault();
 
-    const url = input.value.trim();
+        const url =
+            input.value.trim();
 
-    if (!url) return;
+        if (!url) return;
 
-    if (!isValidUrl(url)) {
+        // Invalid URL
+        if (!isValidUrl(url)) {
 
-        result.classList.remove("hidden");
+            result.classList.remove(
+                "hidden"
+            );
 
-        resultContent.innerHTML = `
-            <div style="color:red;">
-                ERROR: Invalid URL
-            </div>
-        `;
+            resultContent.innerHTML = `
 
-        return;
+                <div style="
+                    color:red;
+                    background:#111;
+                    border:1px solid #300;
+                    padding:15px;
+                    border-radius:8px;
+                ">
+
+                    ERROR: Invalid URL
+
+                </div>
+
+            `;
+
+            return;
+
+        }
+
+        // Start bypass
+        await performBypass(url);
+
     }
-
-    await performBypass(url);
-
-});
+);
