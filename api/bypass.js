@@ -1,51 +1,56 @@
-const rateLimitMap = new Map();
+import crypto from "crypto";
+
+const rateMap = new Map();
 
 export default async function handler(req, res) {
 
     try {
 
-        // Only GET requests
         if (req.method !== "GET") {
+
             return res.status(405).json({
                 error: "Method not allowed"
             });
+
         }
 
-        // Get user IP
+        // =========================
+        // IP
+        // =========================
+
         const ip =
             req.headers["x-forwarded-for"] ||
             req.socket.remoteAddress ||
             "unknown";
 
-        // ===== RATE LIMIT =====
+        // =========================
+        // RATE LIMIT
+        // =========================
 
         const now = Date.now();
 
-        const user = rateLimitMap.get(ip);
+        const user =
+            rateMap.get(ip);
 
         if (user) {
 
-            const timePassed = now - user.startTime;
+            const diff =
+                now - user.time;
 
-            // Reset after 60 sec
-            if (timePassed > 60000) {
+            if (diff > 60000) {
 
-                rateLimitMap.set(ip, {
+                rateMap.set(ip, {
                     count: 1,
-                    startTime: now
+                    time: now
                 });
 
             } else {
 
-                // Max 5 requests
                 if (user.count >= 5) {
 
                     return res.status(429).json({
-                        error: "Rate limit exceeded",
-                        retryAfter:
-                            Math.ceil(
-                                (60000 - timePassed) / 1000
-                            ) + " seconds"
+                        error:
+                            "Rate limit exceeded"
                     });
 
                 }
@@ -56,33 +61,114 @@ export default async function handler(req, res) {
 
         } else {
 
-            rateLimitMap.set(ip, {
+            rateMap.set(ip, {
                 count: 1,
-                startTime: now
+                time: now
             });
 
         }
 
-        // =====================
+        // =========================
+        // HEADERS
+        // =========================
 
-        const { url, token } = req.query;
+        const signature =
+            req.headers["x-atlantis-signature"];
 
-        // Validate URL
+        const timestamp =
+            req.headers["x-atlantis-timestamp"];
+
+        const nonce =
+            req.headers["x-atlantis-nonce"];
+
+        if (
+            !signature ||
+            !timestamp ||
+            !nonce
+        ) {
+
+            return res.status(403).json({
+                error: "Unauthorized"
+            });
+
+        }
+
+        // =========================
+        // EXPIRE CHECK
+        // =========================
+
+        const age =
+            Math.abs(
+                Date.now() -
+                Number(timestamp)
+            );
+
+        // 60 sec expiry
+
+        if (age > 60000) {
+
+            return res.status(403).json({
+                error: "Token expired"
+            });
+
+        }
+
+        // =========================
+        // VERIFY SIGNATURE
+        // =========================
+
+        const payload =
+            `${ip}:${timestamp}:${nonce}`;
+
+        const expected =
+            crypto
+                .createHmac(
+                    "sha256",
+                    process.env.JWT_SECRET
+                )
+                .update(payload)
+                .digest("hex");
+
+        if (expected !== signature) {
+
+            return res.status(403).json({
+                error: "Invalid signature"
+            });
+
+        }
+
+        // =========================
+        // QUERY
+        // =========================
+
+        const { url, token } =
+            req.query;
+
         if (!url) {
+
             return res.status(400).json({
                 error: "Missing URL"
             });
+
         }
 
         if (!token) {
+
             return res.status(400).json({
-                error: "Missing captcha token"
+                error:
+                    "Missing captcha token"
             });
+
         }
 
-        // Check URL format
+        // =========================
+        // URL VALIDATION
+        // =========================
+
         try {
+
             new URL(url);
+
         } catch {
 
             return res.status(400).json({
@@ -91,12 +177,17 @@ export default async function handler(req, res) {
 
         }
 
-        // Optional domain lock
-        const referer = req.headers.referer || "";
+        // =========================
+        // REFERER LOCK
+        // =========================
+
+        const referer =
+            req.headers.referer || "";
 
         if (
-            !referer.includes("atlantislabs.top") &&
-            !referer.includes("localhost")
+            !referer.includes(
+                "atlantislabs.top"
+            )
         ) {
 
             return res.status(403).json({
@@ -105,24 +196,33 @@ export default async function handler(req, res) {
 
         }
 
-        // REAL API REQUEST
-        const apiResponse = await fetch(
-            `https://ka.idarko.xyz/website/bypass?url=${encodeURIComponent(url)}&token=${token}`,
-            {
-                headers: {
-                    "x-api-key": process.env.API_KEY
+        // =========================
+        // REAL API
+        // =========================
+
+        const response =
+            await fetch(
+                `https://ka.idarko.xyz/website/bypass?url=${encodeURIComponent(url)}&token=${token}`,
+                {
+                    headers: {
+                        "x-api-key":
+                            process.env.API_KEY
+                    }
                 }
-            }
-        );
+            );
 
-        const data = await apiResponse.json();
+        const data =
+            await response.json();
 
-        return res.status(200).json(data);
+        return res
+            .status(200)
+            .json(data);
 
-    } catch (err) {
+    } catch {
 
         return res.status(500).json({
-            error: "Internal server error"
+            error:
+                "Internal server error"
         });
 
     }
