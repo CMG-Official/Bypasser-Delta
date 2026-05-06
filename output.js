@@ -98,7 +98,7 @@ async function performBypass(url) {
 
         }
 
-        // A
+        // API URL
         const apiUrl =
             `https://delta.atlantislabs.top/api/bypass?url=${encodeURIComponent(url)}&token=${token}`;
 
@@ -124,6 +124,21 @@ async function performBypass(url) {
             data?.time ||
             "Unknown";
 
+        // AUTO COPY
+        let copiedText = "Auto copied";
+
+        try {
+
+            await navigator.clipboard.writeText(
+                bypassedKey
+            );
+
+        } catch {
+
+            copiedText = "Copy failed";
+
+        }
+
         // Render result
         resultContent.innerHTML = `
 
@@ -133,7 +148,6 @@ async function performBypass(url) {
                 border:1px solid #222;
                 border-radius:8px;
                 margin-bottom:15px;
-                position:relative;
             ">
 
                 <h4 style="
@@ -147,29 +161,21 @@ async function performBypass(url) {
                     color:lime;
                     font-size:1.1rem;
                     word-break:break-all;
-                    padding-right:70px;
+                    margin-bottom:12px;
                 ">
                     ${bypassedKey}
                 </div>
 
-                <button
-                    id="copy-key-btn"
-                    style="
-                        position:absolute;
-                        right:15px;
-                        top:50%;
-                        transform:translateY(-50%);
-                        background:lime;
-                        color:black;
-                        border:none;
-                        padding:8px 12px;
-                        border-radius:6px;
-                        cursor:pointer;
-                        font-weight:bold;
-                    "
-                >
-                    Copy
-                </button>
+                <div style="
+                    display:inline-block;
+                    background:lime;
+                    color:black;
+                    padding:8px 14px;
+                    border-radius:6px;
+                    font-weight:bold;
+                ">
+                    ${copiedText}
+                </div>
 
             </div>
 
@@ -196,39 +202,6 @@ async function performBypass(url) {
             </div>
 
         `;
-
-        // Copy button
-        const copyBtn =
-            document.getElementById(
-                "copy-key-btn"
-            );
-
-        if (copyBtn) {
-
-            copyBtn.addEventListener(
-                "click",
-                () => {
-
-                    navigator.clipboard
-                        .writeText(bypassedKey)
-                        .then(() => {
-
-                            copyBtn.innerText =
-                                "Copied!";
-
-                            setTimeout(() => {
-
-                                copyBtn.innerText =
-                                    "Copy";
-
-                            }, 2000);
-
-                        });
-
-                }
-            );
-
-        }
 
     } catch (err) {
 
