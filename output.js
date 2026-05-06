@@ -63,7 +63,7 @@ async function performBypass(url) {
 
         // YOUR CUSTOM API
         const api =
-            `https://api.atlantislabs.top/api/bypass?url=${encodeURIComponent(url)}&token=${token}`;
+            `https://delta.atlantislabs.top/api/bypass?url=${encodeURIComponent(url)}&token=${token}`;
 
         const response = await fetch(api);
 
