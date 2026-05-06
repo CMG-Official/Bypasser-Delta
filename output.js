@@ -8,25 +8,35 @@ window.initHcaptcha = function () {
 
     try {
 
-        widgetId = hcaptcha.render("hcaptcha-container", {
+        widgetId = hcaptcha.render(
+            "hcaptcha-container",
+            {
 
-            sitekey: "6b22d8d6-8eca-4dbe-9f40-c8ae55c62330",
+                sitekey:
+                    "6b22d8d6-8eca-4dbe-9f40-c8ae55c62330",
 
-            theme: "dark",
+                theme: "dark",
 
-            callback: () => {
-                captchaReady = true;
-            },
+                callback: () => {
 
-            "expired-callback": () => {
-                captchaReady = false;
-            },
+                    captchaReady = true;
 
-            "error-callback": () => {
-                captchaReady = false;
+                },
+
+                "expired-callback": () => {
+
+                    captchaReady = false;
+
+                },
+
+                "error-callback": () => {
+
+                    captchaReady = false;
+
+                }
+
             }
-
-        });
+        );
 
     } catch (err) {
 
@@ -37,17 +47,30 @@ window.initHcaptcha = function () {
 };
 
 // Elements
-const form = document.getElementById("bypass-form");
+const form =
+    document.getElementById(
+        "bypass-form"
+    );
 
-const input = document.getElementById("bypass-url");
+const input =
+    document.getElementById(
+        "bypass-url"
+    );
 
-const result = document.getElementById("result");
+const result =
+    document.getElementById(
+        "result"
+    );
 
 const resultContent =
-    document.getElementById("result-content");
+    document.getElementById(
+        "result-content"
+    );
 
 const loadingBox =
-    document.getElementById("loading-box");
+    document.getElementById(
+        "loading-box"
+    );
 
 // Validate URL
 function isValidUrl(url) {
@@ -66,18 +89,22 @@ function isValidUrl(url) {
 
 }
 
-// Main bypass function
+// Main bypass
 async function performBypass(url) {
 
     try {
 
-        // Show loading
-        loadingBox.classList.remove("hidden");
+        // Show loader
+        loadingBox.classList.remove(
+            "hidden"
+        );
 
         // Hide old result
-        result.classList.add("hidden");
+        result.classList.add(
+            "hidden"
+        );
 
-        // Check captcha
+        // hCaptcha check
         if (!captchaReady) {
 
             throw new Error(
@@ -86,9 +113,11 @@ async function performBypass(url) {
 
         }
 
-        // Get captcha token
+        // hCaptcha token
         const token =
-            hcaptcha.getResponse(widgetId);
+            hcaptcha.getResponse(
+                widgetId
+            );
 
         if (!token) {
 
@@ -98,22 +127,70 @@ async function performBypass(url) {
 
         }
 
+        // =========================
+        // AUTH REQUEST
+        // =========================
+
+        const authResponse =
+            await fetch(
+                "https://delta.atlantislabs.top/api/auth"
+            );
+
+        const authData =
+            await authResponse.json();
+
+        // =========================
         // API URL
+        // =========================
+
         const apiUrl =
             `https://delta.atlantislabs.top/api/bypass?url=${encodeURIComponent(url)}&token=${token}`;
 
-        // Request
-        const response =
-            await fetch(apiUrl);
+        // =========================
+        // MAIN REQUEST
+        // =========================
 
-        // JSON
+        const response =
+            await fetch(apiUrl, {
+
+                headers: {
+
+                    "x-atlantis-signature":
+                        authData.signature,
+
+                    "x-atlantis-timestamp":
+                        authData.timestamp,
+
+                    "x-atlantis-nonce":
+                        authData.nonce
+
+                }
+
+            });
+
         const data =
             await response.json();
 
-        // Show result
-        result.classList.remove("hidden");
+        // =========================
+        // ERROR CHECK
+        // =========================
 
-        // Values
+        if (data.error) {
+
+            throw new Error(
+                data.error
+            );
+
+        }
+
+        // =========================
+        // SHOW RESULT
+        // =========================
+
+        result.classList.remove(
+            "hidden"
+        );
+
         const bypassedKey =
             data?.data?.result ||
             data?.result ||
@@ -124,22 +201,31 @@ async function performBypass(url) {
             data?.time ||
             "Unknown";
 
+        // =========================
         // AUTO COPY
-        let copiedText = "Auto copied";
+        // =========================
+
+        let copiedText =
+            "Auto copied";
 
         try {
 
-            await navigator.clipboard.writeText(
-                bypassedKey
-            );
+            await navigator.clipboard
+                .writeText(
+                    bypassedKey
+                );
 
         } catch {
 
-            copiedText = "Copy failed";
+            copiedText =
+                "Copy failed";
 
         }
 
-        // Render result
+        // =========================
+        // RENDER
+        // =========================
+
         resultContent.innerHTML = `
 
             <div style="
@@ -205,8 +291,13 @@ async function performBypass(url) {
 
     } catch (err) {
 
-        // Show error
-        result.classList.remove("hidden");
+        // =========================
+        // ERROR
+        // =========================
+
+        result.classList.remove(
+            "hidden"
+        );
 
         resultContent.innerHTML = `
 
@@ -226,16 +317,27 @@ async function performBypass(url) {
 
     } finally {
 
-        // Hide loader
-        loadingBox.classList.add("hidden");
+        // =========================
+        // HIDE LOADER
+        // =========================
 
-        // Reset captcha
+        loadingBox.classList.add(
+            "hidden"
+        );
+
+        // =========================
+        // RESET CAPTCHA
+        // =========================
+
         if (
             widgetId &&
-            typeof hcaptcha !== "undefined"
+            typeof hcaptcha !==
+                "undefined"
         ) {
 
-            hcaptcha.reset(widgetId);
+            hcaptcha.reset(
+                widgetId
+            );
 
             captchaReady = false;
 
@@ -245,7 +347,7 @@ async function performBypass(url) {
 
 }
 
-// Form submit
+// Submit
 form.addEventListener(
     "submit",
     async (e) => {
@@ -284,8 +386,10 @@ form.addEventListener(
 
         }
 
-        // Start bypass
-        await performBypass(url);
+        // Run
+        await performBypass(
+            url
+        );
 
     }
 );
